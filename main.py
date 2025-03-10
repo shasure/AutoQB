@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import time
 import random
 import subprocess
+from urllib.parse import urlparse
 
 import pandas as pd
 
@@ -134,12 +135,33 @@ def csv_to_html(csv_file_path, html_file_path):
         file.write(html_content)
     print(f"CSV 文件已成功转换为 HTML 并保存到 {html_file_path}")
 
+def is_domain_blacklisted(link, blacklist):
+    """
+    检查链接的域名是否在黑名单中。
+
+    :param link: 输入的链接
+    :param blacklist: 黑名单域名列表
+    :return: 如果域名在黑名单中返回 True，否则返回 False
+    """
+    try:
+        parsed_url = urlparse(link)
+        domain = parsed_url.netloc
+        for black_domain in blacklist:
+            if domain.endswith(black_domain):
+                return True
+    except ValueError:
+        return False
 
 def main():
     # 读取配置文件
     with open('config.yaml', 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
     print("成功读取配置文件")
+
+    # 读取 blacklist.txt 文件中的域名
+    blacklist = []
+    with open('blacklist.txt', 'r', encoding='utf-8') as file:
+        blacklist = file.read().splitlines()
 
     # 读取 query.txt 文件中的关键词
     with open(config['query_file'], 'r', encoding='utf-8') as file:
@@ -203,11 +225,12 @@ def main():
                     try:
                         title = result.query_selector('h3').text_content()
                         link = result.query_selector('a').get_attribute('href')
-                        # 提取摘要
-                        snippet = result.query_selector('div.VwiC3b').text_content() if result.query_selector(
-                            'div.VwiC3b') else ""
-                        results.append({'keyword': keyword, 'title': title, 'link': link, 'snippet': snippet})
-                        result_count += 1
+                        if not is_domain_blacklisted(link, blacklist):
+                            # 提取摘要
+                            snippet = result.query_selector('div.VwiC3b').text_content() if result.query_selector(
+                                'div.VwiC3b') else ""
+                            results.append({'keyword': keyword, 'title': title, 'link': link, 'snippet': snippet})
+                            result_count += 1
                     except Exception as e:
                         print(f"Error extracting result: {e}")
                 print(f"从第 {page_num + 1} 页获取到 {result_count} 条结果")

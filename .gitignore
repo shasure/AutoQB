@@ -118,3 +118,8 @@ env/
 # PyCharm
 .idea/
 *.iml
+
+# costum
+blacklist.txt
+custom_search_results.html
+custom_search_results.csv
