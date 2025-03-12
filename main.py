@@ -160,7 +160,7 @@ def main():
 
     # 读取 blacklist.txt 文件中的域名
     blacklist = []
-    with open('blacklist.txt', 'r', encoding='utf-8') as file:
+    with open(config['blacklist_file'], 'r', encoding='utf-8') as file:
         blacklist = file.read().splitlines()
 
     # 读取 query.txt 文件中的关键词
@@ -236,7 +236,7 @@ def main():
                 print(f"从第 {page_num + 1} 页获取到 {result_count} 条结果")
 
             browser.close()
-            print("关闭浏览器")
+            print("关闭浏览器连接")
 
     # 将结果转换为 DataFrame
     df = pd.DataFrame(results)

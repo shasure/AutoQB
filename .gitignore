@@ -119,6 +119,9 @@ env/
 .idea/
 *.iml
 
+# mac
+.DS_Store
+
 # costum
 blacklist.txt
 custom_search_results.html
